@@ -13,6 +13,9 @@ from tweepy.models import Model
 
 re_path_template = re.compile('{\w+}')
 
+# No Request should take more than 90 seconds
+REQUEST_TIMEOUT = 90.0
+
 
 def bind_api(**config):
 
@@ -128,11 +131,8 @@ def bind_api(**config):
             retries_performed = 0
             while retries_performed < self.retry_count + 1:
                 # Open connection
-                # FIXME: add timeout
-                if self.api.secure:
-                    conn = httplib.HTTPSConnection(self.host, timeout=90)
-                else:
-                    conn = httplib.HTTPConnection(self.host, timeout=90)
+                Conn = httplib.HTTPSConnection if self.api.secure else httplib.HTTPConnection
+                conn = Conn(self.host, timeout=REQUEST_TIMEOUT)
 
                 # Apply authentication
                 if self.api.auth:
@@ -144,6 +144,7 @@ def bind_api(**config):
                 # Execute request
                 try:
                     conn.request(self.method, url, headers=self.headers, body=self.post_data)
+                    connection.sock.settimeout(REQUEST_TIMEOUT)
                     resp = conn.getresponse()
                 except Exception, e:
                     raise TweepError('Failed to send request: %s' % e)
