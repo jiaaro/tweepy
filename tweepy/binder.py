@@ -144,7 +144,7 @@ def bind_api(**config):
                 # Execute request
                 try:
                     conn.request(self.method, url, headers=self.headers, body=self.post_data)
-                    connection.sock.settimeout(REQUEST_TIMEOUT)
+                    conn.sock.settimeout(REQUEST_TIMEOUT)
                     resp = conn.getresponse()
                 except Exception, e:
                     raise TweepError('Failed to send request: %s' % e)
